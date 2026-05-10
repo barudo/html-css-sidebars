@@ -72,7 +72,7 @@
       margin-bottom: 74px;
     }
 
-    .search-button,
+    .search-control,
     .nav-button {
       min-height: 56px;
       margin-top: 5px;
@@ -91,15 +91,34 @@
       overflow: hidden;
     }
 
-    .search-button {
+    .search-control {
       color: #888;
       background: #fff;
       font-weight: 400;
       font-size: 20px;
+      cursor: text;
     }
 
-    .primary-sidebar:not(.is-expanded) .search-button {
-      color: transparent;
+    .primary-sidebar:not(.is-expanded) .search-control {
+      color: var(--light-orange);
+      font-size: 26px;
+      cursor: pointer;
+    }
+
+    .search-control input {
+      width: 0;
+      min-width: 0;
+      border: 0;
+      outline: 0;
+      padding: 0;
+      color: #888;
+      background: transparent;
+      font: inherit;
+      opacity: 0;
+    }
+
+    .search-control input::placeholder {
+      color: #888;
     }
 
     .nav-button:hover,
@@ -109,6 +128,7 @@
       background: rgba(255, 255, 255, 0.22);
     }
 
+    .search-control .icon-slot,
     .nav-button .icon-slot,
     .secondary-link .icon-slot {
       width: 32px;
@@ -119,21 +139,26 @@
     }
 
     .nav-button .label,
-    .search-button .label {
+    .search-control .label {
       display: none;
       min-width: 0;
     }
 
     .primary-sidebar.is-expanded .nav-button,
-    .primary-sidebar.is-expanded .search-button {
+    .primary-sidebar.is-expanded .search-control {
       justify-content: flex-start;
       padding-left: 22px;
       padding-right: 22px;
     }
 
     .primary-sidebar.is-expanded .nav-button .label,
-    .primary-sidebar.is-expanded .search-button .label {
+    .primary-sidebar.is-expanded .search-control .label {
       display: inline;
+    }
+
+    .primary-sidebar.is-expanded .search-control input {
+      width: 100%;
+      opacity: 1;
     }
 
     .sidebar-spacer {
@@ -163,7 +188,7 @@
       position: fixed;
       top: 26px;
       left: calc(var(--sidebar-min) + 28px);
-      z-index: 25;
+      z-index: 35;
       width: 66px;
       height: 66px;
       border: 0;
@@ -177,8 +202,14 @@
     }
 
     .primary-sidebar.is-expanded ~ .secondary-launcher {
-      opacity: 0;
-      pointer-events: none;
+      left: calc(var(--sidebar-max) + 28px);
+    }
+
+    .secondary-launcher.is-open {
+      top: 7px;
+      left: calc(var(--sidebar-min) + 14px);
+      background: transparent;
+      box-shadow: none;
     }
 
     .secondary-sidebar {
@@ -198,19 +229,10 @@
 
     .secondary-header {
       height: 66px;
-      padding-left: 14px;
+      padding-left: 82px;
       display: flex;
       align-items: center;
       background: var(--secondary-dark);
-    }
-
-    .secondary-toggle {
-      width: 52px;
-      height: 52px;
-      border: 0;
-      color: #fff;
-      background: transparent;
-      font-size: 34px;
     }
 
     .secondary-menu {
@@ -336,7 +358,7 @@
       }
 
       .primary-sidebar > .brand-mark,
-      .search-button,
+      .search-control,
       .sidebar-spacer,
       .primary-toggle,
       .utility-button,
@@ -413,10 +435,10 @@
         <i class="fa-solid fa-hands-holding-heart"></i>
       </div>
 
-      <button class="btn search-button" type="button">
+      <label class="search-control" id="searchControl" aria-label="Search">
         <i class="fa-solid fa-magnifying-glass icon-slot" aria-hidden="true"></i>
-        <span class="label">Search...</span>
-      </button>
+        <input id="primarySearchInput" type="search" placeholder="Search...">
+      </label>
 
       <nav class="primary-nav" aria-label="Main">
         <button class="btn nav-button is-active" type="button" aria-label="Home">
@@ -466,11 +488,7 @@
     </button>
 
     <aside class="secondary-sidebar" id="secondarySidebar" aria-label="Secondary navigation">
-      <div class="secondary-header">
-        <button class="secondary-toggle" id="secondaryToggle" type="button" aria-label="Close secondary sidebar" aria-expanded="true">
-          <i class="fa-solid fa-bars" aria-hidden="true"></i>
-        </button>
-      </div>
+      <div class="secondary-header"></div>
       <nav class="secondary-menu" aria-label="Secondary">
         <button class="btn secondary-link" type="button">
           <i class="fa-solid fa-house icon-slot" aria-hidden="true"></i>
@@ -548,7 +566,8 @@
     const primaryToggle = document.getElementById('primaryToggle');
     const secondarySidebar = document.getElementById('secondarySidebar');
     const secondaryLauncher = document.getElementById('secondaryLauncher');
-    const secondaryToggle = document.getElementById('secondaryToggle');
+    const searchControl = document.getElementById('searchControl');
+    const primarySearchInput = document.getElementById('primarySearchInput');
 
     function setPrimary(open) {
       primarySidebar.classList.toggle('is-expanded', open);
@@ -562,9 +581,9 @@
 
     function setSecondary(open) {
       secondarySidebar.classList.toggle('is-open', open);
+      secondaryLauncher.classList.toggle('is-open', open);
       secondaryLauncher.setAttribute('aria-expanded', String(open));
-      secondaryToggle.setAttribute('aria-expanded', String(open));
-      secondaryToggle.setAttribute('aria-label', open ? 'Close secondary sidebar' : 'Open secondary sidebar');
+      secondaryLauncher.setAttribute('aria-label', open ? 'Close secondary sidebar' : 'Open secondary sidebar');
 
       if (open) {
         primarySidebar.classList.remove('is-expanded');
@@ -573,16 +592,25 @@
       }
     }
 
+    function focusSearch() {
+      setPrimary(true);
+      window.setTimeout(() => {
+        primarySearchInput.focus();
+      }, 230);
+    }
+
     primaryToggle.addEventListener('click', () => {
       setPrimary(!primarySidebar.classList.contains('is-expanded'));
     });
 
     secondaryLauncher.addEventListener('click', () => {
-      setSecondary(true);
+      setSecondary(!secondarySidebar.classList.contains('is-open'));
     });
 
-    secondaryToggle.addEventListener('click', () => {
-      setSecondary(false);
+    searchControl.addEventListener('click', () => {
+      if (!primarySidebar.classList.contains('is-expanded')) {
+        focusSearch();
+      }
     });
   </script>
 </body>

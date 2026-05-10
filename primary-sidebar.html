@@ -70,7 +70,7 @@
       margin-bottom: 74px;
     }
 
-    .search-button,
+    .search-control,
     .nav-button {
       min-height: 56px;
       margin-top: 5px;
@@ -89,15 +89,34 @@
       overflow: hidden;
     }
 
-    .search-button {
+    .search-control {
       color: #888;
       background: #fff;
       font-weight: 400;
       font-size: 20px;
+      cursor: text;
     }
 
-    .primary-sidebar:not(.is-expanded) .search-button {
-      color: transparent;
+    .primary-sidebar:not(.is-expanded) .search-control {
+      color: var(--light-orange);
+      font-size: 26px;
+      cursor: pointer;
+    }
+
+    .search-control input {
+      width: 0;
+      min-width: 0;
+      border: 0;
+      outline: 0;
+      padding: 0;
+      color: #888;
+      background: transparent;
+      font: inherit;
+      opacity: 0;
+    }
+
+    .search-control input::placeholder {
+      color: #888;
     }
 
     .nav-button:hover,
@@ -107,6 +126,7 @@
       background: rgba(255, 255, 255, 0.22);
     }
 
+    .search-control .icon-slot,
     .nav-button .icon-slot {
       width: 32px;
       min-width: 32px;
@@ -116,21 +136,26 @@
     }
 
     .nav-button .label,
-    .search-button .label {
+    .search-control .label {
       display: none;
       min-width: 0;
     }
 
     .primary-sidebar.is-expanded .nav-button,
-    .primary-sidebar.is-expanded .search-button {
+    .primary-sidebar.is-expanded .search-control {
       justify-content: flex-start;
       padding-left: 22px;
       padding-right: 22px;
     }
 
     .primary-sidebar.is-expanded .nav-button .label,
-    .primary-sidebar.is-expanded .search-button .label {
+    .primary-sidebar.is-expanded .search-control .label {
       display: inline;
+    }
+
+    .primary-sidebar.is-expanded .search-control input {
+      width: 100%;
+      opacity: 1;
     }
 
     .sidebar-spacer {
@@ -206,7 +231,7 @@
       }
 
       .brand-mark,
-      .search-button,
+      .search-control,
       .sidebar-spacer,
       .sidebar-toggle,
       .utility-button {
@@ -256,10 +281,10 @@
         <i class="fa-solid fa-hands-holding-heart"></i>
       </div>
 
-      <button class="btn search-button" type="button">
+      <label class="search-control" id="searchControl" aria-label="Search">
         <i class="fa-solid fa-magnifying-glass icon-slot" aria-hidden="true"></i>
-        <span class="label">Search...</span>
-      </button>
+        <input id="primarySearchInput" type="search" placeholder="Search...">
+      </label>
 
       <nav class="primary-nav" aria-label="Main">
         <button class="btn nav-button is-active" type="button" aria-label="Home">
@@ -315,11 +340,30 @@
   <script>
     const primarySidebar = document.getElementById('primarySidebar');
     const primaryToggle = document.getElementById('primaryToggle');
+    const searchControl = document.getElementById('searchControl');
+    const primarySearchInput = document.getElementById('primarySearchInput');
+
+    function setPrimary(open) {
+      primarySidebar.classList.toggle('is-expanded', open);
+      primaryToggle.setAttribute('aria-expanded', String(open));
+      primaryToggle.setAttribute('aria-label', open ? 'Minimize primary sidebar' : 'Expand primary sidebar');
+    }
+
+    function focusSearch() {
+      setPrimary(true);
+      window.setTimeout(() => {
+        primarySearchInput.focus();
+      }, 230);
+    }
 
     primaryToggle.addEventListener('click', () => {
-      const expanded = primarySidebar.classList.toggle('is-expanded');
-      primaryToggle.setAttribute('aria-expanded', String(expanded));
-      primaryToggle.setAttribute('aria-label', expanded ? 'Minimize primary sidebar' : 'Expand primary sidebar');
+      setPrimary(!primarySidebar.classList.contains('is-expanded'));
+    });
+
+    searchControl.addEventListener('click', () => {
+      if (!primarySidebar.classList.contains('is-expanded')) {
+        focusSearch();
+      }
     });
   </script>
 </body>
